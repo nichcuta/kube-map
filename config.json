@@ -1,0 +1,27 @@
+{
+  "skipNamespaces": [
+    "argocd",
+    "ambassador",
+    "collectorforkubernetes",
+    "default",
+    "emissary-system",
+    "kube-system"
+  ],
+  "skipKinds": [
+    "ClusterSecretStore"
+  ],
+  "skipSpecificDeployments": [
+    "mongo-db"
+  ],
+  "skipDeploymentPrefix": [],
+  "skipDeploymentSuffix": [
+    "-redis",
+    "-elasticsearch",
+    "-kibana"
+  ],
+  "includeVCTvolumes": false,
+  "skipIngressClassName": [
+    "oldnginx"
+  ],
+  "outputUnmappedResources": true
+}
