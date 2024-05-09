@@ -477,7 +477,7 @@ for resource in deploymentsList:
     for resourceAdded in resourceMap:   # Adds all mapped resources to the list for later processing
         mappedResources.append(resourceAdded)
 
-    with open(os.path.join(outputFolderPath, str(resource['metadata']['namespace'])+'-'+str(resource['metadata']['name'])+'.json'), "w") as outputFile:
+    with open(os.path.join(outputFolderPath, str(resource['metadata']['namespace'])+'_'+str(resource['metadata']['name'])+'.json'), "w") as outputFile:
         json.dump(dictSanitiser(resourceMap), outputFile, indent=4, sort_keys=True)     # Output resource file with all its mapped resources
 
 
@@ -522,7 +522,7 @@ for cronjob in cronJobList:     # Mapping standalone cronJobs with their resourc
         for resourceAdded in resourceMap:   # Adds all mapped resources to the list for later processing
             mappedResources.append(resourceAdded)
 
-        with open(os.path.join(outputFolderPath, str(cronjob['metadata']['namespace'])+'-'+str(cronjob['metadata']['name'])+'-cronjob.json'), "w") as outputFile:
+        with open(os.path.join(outputFolderPath, str(cronjob['metadata']['namespace'])+'_'+str(cronjob['metadata']['name'])+'-cronjob.json'), "w") as outputFile:
             json.dump(dictSanitiser(resourceMap), outputFile, indent=4, sort_keys=True) # Output cronjob file with all its mapped resources
 
 
@@ -567,7 +567,7 @@ for job in sanitisedJobList:     # Mapping standalone jobs with their resources
         for resourceAdded in resourceMap:   # Adds all mapped resources to the list for later processing
             mappedResources.append(resourceAdded)
 
-        with open(os.path.join(outputFolderPath, str(job['metadata']['namespace'])+'-'+str(job['metadata']['name'].replace('-'+job['metadata']['name'].split('-')[-1], '').replace('-job', ''))+'-job.json'), "w") as outputFile:
+        with open(os.path.join(outputFolderPath, str(job['metadata']['namespace'])+'_'+str(job['metadata']['name'].replace('-'+job['metadata']['name'].split('-')[-1], '').replace('-job', ''))+'-job.json'), "w") as outputFile:
             json.dump(dictSanitiser(resourceMap), outputFile, indent=4, sort_keys=True) # Output job file with all its mapped resources
 
 
@@ -576,11 +576,11 @@ for job in sanitisedJobList:     # Mapping standalone jobs with their resources
 #############################
 
 if externalMappings:
-    with open(os.path.join(outputFolderPath, '1.ambassador-External-Mappings.json'), "w") as outputFile:    # Create json file with external mappings which cant be mapped to a service.
+    with open(os.path.join(outputFolderPath, '1.ambassador_External-Mappings.json'), "w") as outputFile:    # Create json file with external mappings which cant be mapped to a service.
         json.dump(dictSanitiser(externalMappings), outputFile, indent=4, sort_keys=True)
 
 if unmappedFilters:
-    with open(os.path.join(outputFolderPath, '2.ambassador-Unmapped-Filters.json'), "w") as outputFile:    # Create json file with non "Extermal" Filters which cant be mapped to a service.
+    with open(os.path.join(outputFolderPath, '2.ambassador_Unmapped-Filters.json'), "w") as outputFile:    # Create json file with non "Extermal" Filters which cant be mapped to a service.
         json.dump(dictSanitiser(unmappedFilters), outputFile, indent=4, sort_keys=True)
 
 if outputUnmappedResources:
@@ -593,9 +593,9 @@ if outputUnmappedResources:
                 unmappedNamespacedResources.append(item)
             elif firstRun and item['metadata'].get('namespace', "") == "":
                 unmappedResources.append(item)
-        with open(os.path.join(outputFolderPath, (namespace['metadata']['name']+'-UNMAPPED-Resources.json')), "w") as outputFile:    # Create json file with unmapped resources
+        with open(os.path.join(outputFolderPath, (namespace['metadata']['name']+'_UNMAPPED-Resources.json')), "w") as outputFile:    # Create json file with unmapped resources
             json.dump(dictSanitiser(unmappedNamespacedResources), outputFile, indent=4, sort_keys=True)
         if firstRun:
             firstRun = False
-            with open(os.path.join(outputFolderPath, '3.global-UNMAPPED-Resources.json'), "w") as outputFile:    # Create json file with unmapped resources
+            with open(os.path.join(outputFolderPath, '3.global_UNMAPPED-Resources.json'), "w") as outputFile:    # Create json file with unmapped resources
                 json.dump(dictSanitiser(unmappedResources), outputFile, indent=4, sort_keys=True)

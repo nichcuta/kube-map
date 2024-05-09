@@ -70,9 +70,9 @@ python3 kube-map.py kubernetes-resources.json
 ## Generated file names:
 | Name                                       | Description                                                                                             |
 |--------------------------------------------|---------------------------------------------------------------------------------------------------------|
-| `1.ambassador-External-Mappings.json`      | Contains Ambassador mappings which have an external HTTP/S backend service                              |
-| `2.ambassador-Unmapped-Filters.json`       | Contains non 'External' Ambassador filters which cant be mapped to a kubernetes resource service        |
-| `3.global-UNMAPPED-Resources.json`         | If `outputUnmappedResources` is set to true, will contain all eligible resources which were not mapped  |
-| `<namespace>-<deployment name>.json`       | Deployment/Statefulset/Daemonset mapped resources JSON file                                             |
-| `<namespace>-<job name>-job.json`          | Standalone Cronjob mapped resources JSON file                                                           |
-| `<namespace>-<cronjob name>-cronjob.json`  | Standalone Job mapped resources JSON file                                                               |
+| `1.ambassador_External-Mappings.json`      | Contains Ambassador mappings which have an external HTTP/S backend service                              |
+| `2.ambassador_Unmapped-Filters.json`       | Contains non 'External' Ambassador filters which cant be mapped to a kubernetes resource service        |
+| `3.global_UNMAPPED-Resources.json`         | If `outputUnmappedResources` is set to true, will contain all eligible resources which were not mapped  |
+| `<namespace>_<deployment name>.json`       | Deployment/Statefulset/Daemonset mapped resources JSON file                                             |
+| `<namespace>_<job name>-job.json`          | Standalone Cronjob mapped resources JSON file                                                           |
+| `<namespace>_<cronjob name>-cronjob.json`  | Standalone Job mapped resources JSON file                                                               |
