@@ -160,5 +160,5 @@ cython_debug/
 #.idea/
 
 output-dir*
-k8s-example-resources*.json
+k8s*-resources*.json
 custom-config.json
