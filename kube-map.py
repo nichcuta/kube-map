@@ -135,7 +135,7 @@ def ingress(resource, ingressList, resourceMap):
 def ambassadorMapping(resource, ambassadorMappingList, namespaceList, ambassadorHostList, resourceMap):
     global externalMappings
     for mapping in ambassadorMappingList:
-        if not mapping['spec'].get('service', "").startswith("http"):
+        if not mapping['spec'].get('service', "").startswith("http") and not mapping['spec'].get('service', "").endswith(".com") and not mapping['spec'].get('service', "").endswith(".co.uk") and not mapping['spec'].get('service', "").endswith(".es") and not mapping['spec'].get('service', "").endswith(".ca"):
             mappingService = mapping['spec'].get('service', "").split(":")[0]
             if "." not in mappingService:   # This means that the mapping must reside in the same namespace as service
                 mappingServiceNamespace = mapping['metadata']['namespace']
@@ -589,7 +589,7 @@ if outputUnmappedResources:
     for namespace in namespaceList:
         unmappedNamespacedResources = []
         for item in allResources:
-            if item not in mappedResources and item['metadata'].get('namespace', "") == namespace['metadata']['name']:
+            if item not in mappedResources and item['metadata'].get('namespace', "") == namespace['metadata']['name'] and item not in externalMappings and item not in unmappedFilters:
                 unmappedNamespacedResources.append(item)
             elif firstRun and item['metadata'].get('namespace', "") == "":
                 unmappedResources.append(item)
