@@ -366,16 +366,19 @@ for resource in deploymentsList:
                 if pvc['metadata']['name'].startswith(volumeClaim['metadata']['name']+"-"+resource['metadata']['name']) and resource['metadata']['namespace'] == pvc['metadata']['namespace']:
                     resourceMap.append(pvc)
     serviceMonitor(resource, serviceMonitorList, resourceMap)   # Build service monitor relation
+    depolymentServices = []
     for service in serviceList:
         if service['spec'].get('selector', {}): # We are not catering for services of type External Name since without proper labeling this is tricky
             if service['metadata']['namespace'] == resource['metadata']['namespace']:
                 if service['spec'].get('selector', {}).items() <= resource['metadata'].get('labels', {}).items(): # Checking if selector matches deployment labels
                     resourceMap.append(service)
+                    depolymentServices.append(service['metadata']['name'])
                     serviceMonitor(service, serviceMonitorList, resourceMap)   # Build service monitor relation
                     ingress(service, ingressList, resourceMap)      # Build Ingress relation
                     ambassadorMapping(service, ambassadorMappingList, namespaceList, ambassadorHostList, resourceMap)      # Build Ambassador Mappings relation
                 elif service['spec'].get('selector', {}).items() <= resource['spec']['template']['metadata'].get('labels', {}).items(): # Checking if selector matches pod labels
                     resourceMap.append(service)
+                    depolymentServices.append(service['metadata']['name'])
                     serviceMonitor(service, serviceMonitorList, resourceMap)   # Build service monitor relation
                     ingress(service, ingressList, resourceMap)      # Build Ingress relation
                     ambassadorMapping(service, ambassadorMappingList, namespaceList, ambassadorHostList, resourceMap)      # Build Ambassador Mappings relation
@@ -384,19 +387,29 @@ for resource in deploymentsList:
             resourceMap.append(podDisruptionBudget)     # Append podDisruptionBudget relation
     for ambassadorFilter in ambassadorFilterList:
         if ambassadorFilter.get('spec', {}).get('External', {}):    # If Filter is not of kind 'External', we will add it to ambassador Filters output file
-            if ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1] == resource['metadata']['namespace'] and ambassadorFilter['spec']['External'].get("auth_service", "").replace('.'+ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1], '') == resource['metadata']['name']:
+            if ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1].split(":")[0] == resource['metadata']['namespace'] and (ambassadorFilter['spec']['External'].get("auth_service", "").replace('.'+ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1], '') == resource['metadata']['name'] or ambassadorFilter['spec']['External'].get("auth_service", "").replace('.'+ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1], '') in depolymentServices):
                 resourceMap.append(ambassadorFilter)     # Append ambassadorFilter relation
                 for ambassadorFilterPolicy in ambassadorFilterPolicyList:   # Checking for ambassadorFilterPolicy relation
                     for ambassadorFilterPolicyObject in ambassadorFilterPolicy['spec'].get('rules', []):
-                        for filter in ambassadorFilterPolicyObject.get('filters', []):
-                            if filter['name'] == ambassadorFilter['metadata']['name'] and filter.get('namespace', ambassadorFilterPolicy['metadata']['namespace']) == resource['metadata']['namespace']:
+                        for afilter in ambassadorFilterPolicyObject.get('filters', []):
+                            if afilter['name'] == ambassadorFilter['metadata']['name'] and afilter.get('namespace', ambassadorFilterPolicy['metadata']['namespace']) == ambassadorFilter['metadata']['namespace']:
                                 resourceMap.append(ambassadorFilterPolicy)  # Append ambassadorFilterPolicy relation
-            elif ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1] == 'ambassador' or ambassadorFilter['spec']['External'].get("auth_service", "").replace('.'+ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1], '') == 'edge-stack':
+            elif ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1].split(":")[0] == 'ambassador' or ambassadorFilter['spec']['External'].get("auth_service", "").replace('.'+ambassadorFilter['spec']['External'].get("auth_service", "").split(".")[-1], '') == 'edge-stack':
                 if ambassadorFilter not in unmappedFilters:
                     unmappedFilters.append(ambassadorFilter)    # If using the ambassador auth service, add the filter resource to unmapped Filters json
+                    for ambassadorFilterPolicy in ambassadorFilterPolicyList:   # Checking for ambassadorFilterPolicy relation
+                        for ambassadorFilterPolicyObject in ambassadorFilterPolicy['spec'].get('rules', []):
+                            for afilter in ambassadorFilterPolicyObject.get('filters', []):
+                                if afilter['name'] == ambassadorFilter['metadata']['name'] and afilter.get('namespace', ambassadorFilterPolicy['metadata']['namespace']) == ambassadorFilter['metadata']['namespace']:
+                                    unmappedFilters.append(ambassadorFilterPolicy)  # Append ambassadorFilterPolicy relation
         else:
             if ambassadorFilter not in unmappedFilters:
                 unmappedFilters.append(ambassadorFilter)
+                for ambassadorFilterPolicy in ambassadorFilterPolicyList:   # Checking for ambassadorFilterPolicy relation
+                    for ambassadorFilterPolicyObject in ambassadorFilterPolicy['spec'].get('rules', []):
+                        for afilter in ambassadorFilterPolicyObject.get('filters', []):
+                            if afilter['name'] == ambassadorFilter['metadata']['name'] and afilter.get('namespace', ambassadorFilterPolicy['metadata']['namespace']) == ambassadorFilter['metadata']['namespace']:
+                                unmappedFilters.append(ambassadorFilterPolicy)  # Append ambassadorFilterPolicy relation
     for cronjob in cronJobList:     # We try to map cronjob to deployment based on deployment/cronjob name, by volumes used, by env vars passed
         cronjobMapped = False   # We need this to determine if we successfully mapped the cronjob or not
         cronjobName = cronjob['metadata']['name'].replace('-migration', '').replace('-scheduler-job', '').replace('-cronjob', '').replace('-cron-job', '').replace('-scheduler', '') # Try and remove any cronjob related suffix to match with resource name
