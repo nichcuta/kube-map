@@ -583,6 +583,8 @@ for job in sanitisedJobList:     # Mapping standalone jobs with their resources
         with open(os.path.join(outputFolderPath, str(job['metadata']['namespace'])+'_'+str(job['metadata']['name'].replace('-'+job['metadata']['name'].split('-')[-1], '').replace('-job', ''))+'-job.json'), "w") as outputFile:
             json.dump(dictSanitiser(resourceMap), outputFile, indent=4, sort_keys=True) # Output job file with all its mapped resources
 
+print("Individual files created, output folder: " + str(outputFolderPath))
+
 
 #############################
 ## Additional Output Files ##
